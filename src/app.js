@@ -14,9 +14,7 @@ const db = Tabela('RSPesqEnt', 1, {
   index: '++id, name, age', // Esquema personalizado
 });
 
-
-
-class Person {
+class indexed {
   //Passar todos os tipos de parametros dos dados que vão ser salvos no indexedDB
   constructor(id, name, age) {
     this.id = id
@@ -46,14 +44,38 @@ class Person {
     alert('Função getById não implementada...')
   }
 
-  static updateId(id, newData) {
-    return db.pesqEntDBLocal.update(id, newData);
+  static async updateId(UniqueData, newData) {
+    // Atualizar o registro com novos dados
+    if (UniqueData) {
+      await db.pesqEntDBLocal.update(UniqueData.id, newData);
+    } else {
+      console.log('Registro não encontrado.');
+    }
   }
 
-  static updateAll(newData) {
-    return db.pesqEntDBLocal.toCollection().modify(record => {
-      Object.assign(record, newData);
+
+  static async updateAll(newData) { // Essa função atualiza todos os dados do banco de dados
+
+    let objectArray = [];
+
+    const response = await indexed.getAll(); // Obtenha os dados primeiro
+
+    objectArray.push(response);
+
+    console.log(...objectArray);
+
+    // Atualizar todos os registros
+
+    const promises = response.map(async object => {
+      await db.pesqEntDBLocal.update(object.id, newData); // Use a chave primária (person.id) para atualizar o registro específico.
     });
+
+    // Aguardar a conclusão de todas as atualizações
+    await Promise.all(promises);
+
+    // Verificar se os dados foram atualizados
+    const updatedData = await db.pesqEntDBLocal.toArray();
+    console.log('Registros atualizados:', updatedData);
   }
 
   static deleteDB() { // metodo para deletar o banco de dados Inteiro
@@ -72,66 +94,54 @@ class Person {
 
 // const newPerson = { name: 'Alice', age: 25 };
 
-// Person.save(objeto);
-// Person.save([newPerson]);
+// indexed.save(objeto);
+// indexed.save([newPerson]);
 
-// Person.save({ name: 'Gabriel', age: 27, teste: 'teste' });
+// indexed.save({ name: 'Gabriel', age: 27, teste: 'teste' });
 
-// Person.save(
+// indexed.save(
 //   { name: 'Alice', age: 25 },
 //   { name: 'Alice', age: 25 },
 //   { name: 'Alice', age: 25 }
 // );
 
 // ? Chamada para pegar todos dados
-let pessoas = [];
-Person.getAll().then(people => {
-  pessoas.push(people)
+// let pessoas = [];
+// indexed.getAll().then(people => {
+//   pessoas.push(people)
 
-  console.log(...pessoas)
-});
+//   console.log(...pessoas)
+// });
 
 // ? Chamada para deletar a tabela completa do banco de dados
-// Person.deleteDB()
+// indexed.deleteDB()
 
 //? ? Chamada para pegar todos dados de um item em especifico e atualizar passando somente a proprietade que deseja atualizar
-// (async () => {
+(async () => {
+  const insertedData = await db.pesqEntDBLocal.where('name').equals('Gabriel').first();
 
-//   const insertedId = await db.pesqEntDBLocal.where('name').equals('Alice').first()
-//   console.log(insertedId.id)
+  console.log('id', insertedData);
+  if (insertedData) {
+    const dados = { name: 'Gabri', age: 25 }
+    
+    await indexed.updateId(insertedData, dados);
+  } else {
+    console.log('Registro não encontrado.');
+  }
+})();
 
-//   // Atualizar o registro com novos dados
-//   if (insertedId) {
-//     // Atualizar o registro com novos dados usando updateId
-//     const updatedData = { name: 'Alikjkl', age: 25 };
-//     await Person.updateId(insertedId.id, updatedData);
 
-//     // Verificar se os dados foram atualizados
-//     Person.getAll().then(people => console.log(people));
-//   } else {
-//     console.log('Registro não encontrado.');
-//   }
-// })();
+
+
+
+
 
 // ? Chamada para atualizar todos os dados do banco de dados
 
-// ! Essa função ainda est´aem desenvolvimento e ainda não funciona
-// (async () => {
-//   const allPeople = Person.getAll();
+// const updatedData = { name: 'Gabriel', age: 25 };
 
-//   // Atualizar todos os registros
-//   const updatedData = { age: 99 };
-//   const promises = allPeople.map((index, person) => {
-//     return db.pesqEntDBLocal.update(updatedData);
-//   });
+// indexed.updateAll(updatedData);
 
-//   // Aguardar a conclusão de todas as atualizações
-//   await Promise.all(promises);
-
-//   // Verificar se os dados foram atualizados
-//   const updatedPeople = await db.pesqEntDBLocal.toArray();
-//   console.log('Registros atualizados:', updatedPeople);
-// })
 
 
 

@@ -111,25 +111,19 @@ A classe Person fornece métodos para atualizar registros individualmente ou em 
 Atualizar um Registro por ID
 Você pode usar o método updateId para atualizar um registro específico por ID.
 
-#### 🚧 Essa função ainda está em desenvolvimento ! 🚧
-
 ```javascript
 (async () => {
-  const allPeople = Person.getAll();
+  const insertedData = await db.pesqEntDBLocal.where('name').equals('Gabriel').first();
 
-  // Atualizar todos os registros
-  const updatedData = { age: 99 };
-  const promises = allPeople.map((index, person) => {
-    return db.pesqEntDBLocal.update(updatedData);
-  });
-
-  // Aguardar a conclusão de todas as atualizações
-  await Promise.all(promises);
-
-  // Verificar se os dados foram atualizados
-  const updatedPeople = await db.pesqEntDBLocal.toArray();
-  console.log('Registros atualizados:', updatedPeople);
-})
+  console.log('id', insertedData);
+  if (insertedData) {
+    const dados = { name: 'Gabri' }
+    
+    await indexed.updateId(insertedData, dados);
+  } else {
+    console.log('Registro não encontrado.');
+  }
+})();
 
 ```
 
@@ -140,8 +134,10 @@ Você pode usar o método updateAll para atualizar todos os registros ao mesmo t
 
 ```javascript
 // Atualizar todos os registros com novos dados
-const updatedData = { age: 99 };
-await Person.updateAll(updatedData);
+const updatedData = { name: 'Gabriel', age: 25 };
+
+Person.updateAll(updatedData);
+
 ```
 
 ## Licença
