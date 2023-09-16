@@ -1,143 +1,87 @@
-# Sistema de Gerenciamento de Dados IndexedDB com Dexie.js
+# IndexedDB com Dexie - Documentação
 
-Este é um sistema de gerenciamento de dados simples usando Dexie.js, um banco de dados indexedDB em JavaScript. O sistema inclui uma classe `Person` que facilita o armazenamento e a recuperação de dados no banco de dados indexedDB.
+O projeto IndexedDB com Dexie é uma aplicação de exemplo que demonstra como usar o IndexedDB com a biblioteca Dexie em JavaScript. O IndexedDB é um banco de dados de objetos JavaScript incorporado em navegadores da web modernos.
 
-## Como Usar
+## Criando um Banco de Dados
 
-Primeiro crie instância do Banco da forma que desejar:
+Para começar, você pode criar um banco de dados IndexedDB usando a função `Tabela`. Ela aceita três parâmetros:
+
 ```javascript
+function Tabela(tabela, dbVersion, config = {})
 
-const version = 1;
+```
 
-const db = Tabela('your-table-name', version, {
-  // Nome do schema personalizado
-  table: 'pesqEntDBLocal', 
+* `tabela`: Nome do banco de dados.
+* `dbVersion`: Versão do banco de dados.
+* `config`: Um objeto de configuração opcional que define o nome da tabela e o esquema dos campos.
 
-  // Passe um index para ajudar no filtro
-  // O index deve existir na sua tabela
-  index: '++id, name, age', 
+#### Exemplo:
+
+```javascript
+const db = Tabela('RSPesqEnt', 1, {
+  table: 'pesqEntDBLocal', // Nome personalizado da tabela
+  index: '++id, name, age', // Esquema personalizado
 });
 ```
 
+## Salvando Dados
 
-## Salvar Dados
+Você pode salvar dados no IndexedDB usando o método `save` da classe `indexed`. Ele aceita vários tipos de parâmetros, como arrays de objetos ou dados individuais.
 
-A classe Person fornece um método estático save que permite salvar dados no banco de dados. Você pode passar um ou mais objetos como argumento para inserir ou atualizar registros.
-
+#### Exemplos:
 
 ```javascript
-// Você pode adicionar um array de objetos
-const objeto = [
-  { name: 'Gabriel' },
-  { name: 'Gabriel', age: 21 },
-  { name: 'Gabriel', age: 22 },
-  { name: 'Gabriel', age: 23, city: 'São Paulo', state: 'SP' },
-];
-
-Person.save(objeto);
-
-// Pode adicionar um objeto por variável
-const newPerson = { name: 'Alice', age: 25 };
-
-Person.save([newPerson]);
-
-// Pode adiconar diretamente 
-Person.save({ name: 'Gabriel', age: 27, teste: 'teste' });
-
-// Pode passar varias objetos individualmente
-Person.save(
-  { name: 'Alice', age: 25 },
-  { name: 'Alice', age: 25 },
-  { name: 'Alice', age: 25 }
-);
+const objeto = [{ name: 'Gabriel' }, { name: 'Alice', age: 25 }];
+indexed.save(objeto);
+indexed.save({ name: 'João', age: 30 });
 ```
 
-## Obter Todos os Dados
+## Recuperando Dados
 
-Você pode usar o método estático getAll da classe Person para obter todos os dados do banco de dados.
+Para recuperar todos os dados da tabela, você pode usar o método `getAll` da classe indexed.
+
+#### Exemplos:
 
 ```javascript
-let pessoas = [];
-
-Person.getAll().then(people => {
-    pessoas.push(people)
-    console.log(...pessoas)
+indexed.getAll().then(people => {
+  console.log(people);
 });
-
-// ou 
-
-Person.getAll().then(people => { console.log(pessoas)});
 ```
 
-## Atualizar Dados
-A classe Person fornece métodos para atualizar registros individualmente ou em massa.
+## Atualizando Dados Pelo Id
 
-Atualizar um Registro por ID
-Você pode usar o método updateId para atualizar um registro específico por ID.
+Você pode atualizar dados no IndexedDB usando o método `updateId` da classe `indexed`. Este método aceita um objeto que representa o registro a ser atualizado e um objeto com os novos dados.
+
+#### Exemplo:
 
 ```javascript
-(async () => {
-  // Pegue um elemento em expecifico pelo seu valor usando where
-  const insertedId = await db.pesqEntDBLocal.where('name').equals('Alice').first()
-  console.log(insertedId.id)
-
-  // Atualizar o registro com novos dados
-  if (insertedId) {
-    Atualizar o registro com novos dados usando updateId
-    const updatedData = { name: 'Alikjkl', age: 25 };
-    await Person.updateId(insertedId.id, updatedData);
-
-    // Verificar se os dados foram atualizados
-    Person.getAll().then(people => console.log(people));
-  } else {
-    console.log('Registro não encontrado.');
-  }
-})();
+const insertedData = await db.pesqEntDBLocal.where('name').equals('Gabriel').first();
+if (insertedData) {
+  const newData = { name: 'Gabri', age: 25 };
+  await indexed.updateId(insertedData, newData);
+} else {
+  console.log('Registro não encontrado.');
+}
 ```
 
-## Deletar Tabela
+## Atualizando Todos os Dados
 
-Você pode usar o método estático deleteDB para excluir a tabela inteira do banco de dados.
+Para atualizar todos os dados na tabela, você pode usar o método `updateAll` da classe `indexed`. Este método aceita um objeto com os novos dados que serão aplicados a todos os registros.
 
-```javascript
-// Cuidado essa chamada vai apagar todos os dados e a tabela vai deixar de existir no indexedDB
-
-Person.deleteDB()
-```
-
-## Atualizar Dados
-A classe Person fornece métodos para atualizar registros individualmente ou em massa.
-
-Atualizar um Registro por ID
-Você pode usar o método updateId para atualizar um registro específico por ID.
+#### Exemplo:
 
 ```javascript
-(async () => {
-  const insertedData = await db.pesqEntDBLocal.where('name').equals('Gabriel').first();
-
-  console.log('id', insertedData);
-  if (insertedData) {
-    const dados = { name: 'Gabri' }
-    
-    await indexed.updateId(insertedData, dados);
-  } else {
-    console.log('Registro não encontrado.');
-  }
-})();
-
-```
-
-## Atualizar Todos os Registros
-Você pode usar o método updateAll para atualizar todos os registros ao mesmo tempo.
-
-#### 🚧 Essa função ainda está em desenvolvimento ! 🚧
-
-```javascript
-// Atualizar todos os registros com novos dados
 const updatedData = { name: 'Gabriel', age: 25 };
+indexed.updateAll(updatedData);
+```
+## Deletando o Banco de Dados
 
-Person.updateAll(updatedData);
+Para excluir o banco de dados inteiro, você pode usar o método `deleteDB` da classe `indexed`.
 
+#### Exemplo:
+
+```javascipt
+indexed.deleteDB();
 ```
 
 ## Licença
