@@ -1,6 +1,6 @@
 
 //NOme do banco de dados
-function Tabela(tabela, dbVersion, config = {}) {
+export function Tabela(tabela, dbVersion, config = {}) {
   const db = new Dexie(tabela);
   db.version(dbVersion).stores({
     [config.table]: config.index, // Nome da tabela e campos
@@ -14,7 +14,7 @@ const db = Tabela('RSPesqEnt', 1, {
   index: '++id, name, age', // Esquema personalizado
 });
 
-class indexed {
+export class indexed {
   //Passar todos os tipos de parametros dos dados que vão ser salvos no indexedDB
   constructor(id, name, age) {
     this.id = id
@@ -82,67 +82,3 @@ class indexed {
     return db.delete();
   }
 }
-
-// ? Chamada para salvar os dados no banco de dados
-
-// const objeto = [
-//   { name: 'Gabriel' },
-//   { name: 'Gabriel', age: 21 },
-//   { name: 'Gabriel', age: 22 },
-//   { name: 'Gabriel', age: 23, city: 'São Paulo', state: 'SP' },
-// ];
-
-// const newPerson = { name: 'Alice', age: 25 };
-
-// indexed.save(objeto);
-// indexed.save([newPerson]);
-
-// indexed.save({ name: 'Gabriel', age: 27, teste: 'teste' });
-
-// indexed.save(
-//   { name: 'Alice', age: 25 },
-//   { name: 'Alice', age: 25 },
-//   { name: 'Alice', age: 25 }
-// );
-
-// ? Chamada para pegar todos dados
-// let pessoas = [];
-// indexed.getAll().then(people => {
-//   pessoas.push(people)
-
-//   console.log(...pessoas)
-// });
-
-// ? Chamada para deletar a tabela completa do banco de dados
-// indexed.deleteDB()
-
-//? ? Chamada para pegar todos dados de um item em especifico e atualizar passando somente a proprietade que deseja atualizar
-(async () => {
-  const insertedData = await db.pesqEntDBLocal.where('name').equals('Gabriel').first();
-
-  console.log('id', insertedData);
-  if (insertedData) {
-    const dados = { name: 'Gabri', age: 25 }
-    
-    await indexed.updateId(insertedData, dados);
-  } else {
-    console.log('Registro não encontrado.');
-  }
-})();
-
-
-
-
-
-
-
-// ? Chamada para atualizar todos os dados do banco de dados
-
-// const updatedData = { name: 'Gabriel', age: 25 };
-
-// indexed.updateAll(updatedData);
-
-
-
-
-
