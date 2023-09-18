@@ -1,0 +1,13 @@
+{
+  "name": "indexeddb-utility-borges",
+  "version": "1.0.0",
+  "description": "O projeto tem como objetivo criar uma biblioteca para facilitar o uso do indexedDB.",
+  "main": "./src/indexedSync.js",
+  "keywords": [],
+  "author": {
+    "name": "Gabriel Borges Oliveira",
+    "email": "gabriel.vscode@gmail.com",
+    "github": "GabrielBorges2000"
+  },
+  "license": "MIT"
+}

@@ -14,12 +14,12 @@ const db = Tabela('RSPesqEnt', 1, {
   index: '++id, name, age', // Esquema personalizado
 });
 
-export class indexed {
+export class indexedAsync {
   //Passar todos os tipos de parametros dos dados que vão ser salvos no indexedDB
   constructor(id, name, age) {
     this.id = id
-    this.name = name;
-    this.age = age;
+    this.name = name
+    this.age = age
   }
 
   static save(...args) { // metodo para salvar os dados de um array, objeto ou um unico dado
@@ -58,7 +58,7 @@ export class indexed {
 
     let objectArray = [];
 
-    const response = await indexed.getAll(); // Obtenha os dados primeiro
+    const response = await indexedAsync.getAll(); // Obtenha os dados primeiro
 
     objectArray.push(response);
 
