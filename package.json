@@ -1,6 +1,6 @@
 {
   "name": "indexeddb-utility-bg",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Este é um utilitário simples para trabalhar com o IndexedDB no navegador. Ele permite criar e gerenciar bancos de dados, tabelas, salvar dados e até mesmo imagens no IndexedDB.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
