@@ -1,62 +1,47 @@
-// function createTable(tabela, dbVersion, config = {}) {
-//   const request = indexedDB.open(tabela, dbVersion);
+interface DataBaseProps {
+  dbName: string
+  dbVersion: number,
+  config: {
+    table: string
+    key: string
+    index: string | string[]
+    unique?: boolean
+  }
+}
 
-//   var db
-//   request.onerror = function (event) {
-//     console.error("Erro ao abrir o banco de dados", event.target.error);
-//   };
+class IndexedSync {
+  private dbName: string;
+  private dbVersion: number;
+  private tableName: string = '';
+  private dataToSave: any | null = null;
+  private config: {
+    table: string;
+    key: string;
+    index: string | string[];
+    unique: boolean;
+  };
 
-//   request.onupgradeneeded = function (event) {
-//     db = event.target.result;
-//     const objectStore = db.createObjectStore(config.table, { keyPath: config.key });
-
-//     if (Array.isArray(config.index)) {
-//       config.index.forEach((field) => {
-//         objectStore.createIndex(field, field, { unique: config.unique });
-//       });
-//     } else {
-//       objectStore.createIndex(config.index, config.index, { unique: config.unique });
-//     }
-
-//   };
-
-//   request.onsuccess = function (event) {
-//     db = event.target.result;
-//     // console.log("Banco de dados aberto com sucesso.");
-//   }
-
-//   return request; // Retornar o objeto de request
-// }
-
-class indexedSync {
-  constructor(dbName, dbVersion, config = {}) {
-
-
+  constructor({ dbName, dbVersion, config }: DataBaseProps) {
     this.dbVersion = dbVersion;
     this.dbName = dbName;
-    this.tableName = ''; // Nome da tabela a ser definido posteriormente
-    this.dataToSave = null; // Dados a serem definidos posteriormente
-
-    // Verifique se as configurações foram fornecidas e defina-as, caso contrário, use valores padrão
     this.config = {
       table: config.table,
       key: config.key,
       index: config.index,
       unique: config.unique || false,
     };
-
     this.createDatabaseAndTable();
   }
 
-  createDatabaseAndTable() {
+  private createDatabaseAndTable(): void {
     const request = indexedDB.open(this.dbName, this.dbVersion);
 
-    request.onerror = function (event) {
-      console.error('Erro ao abrir o banco de dados', event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as any).error);
     };
 
-    request.onupgradeneeded = function (event) {
-      const db = event.target.result;
+    request.onupgradeneeded = (event) => {
+      const db = (event.target as any).result;
       const objectStore = db.createObjectStore(this.config.table, { keyPath: this.config.key });
 
       if (Array.isArray(this.config.index)) {
@@ -66,38 +51,38 @@ class indexedSync {
       } else {
         objectStore.createIndex(this.config.index, this.config.index, { unique: this.config.unique });
       }
-    }.bind(this);
+    };
 
-    request.onsuccess = function (event) {
+    request.onsuccess = (event) => {
       // console.log('Banco de dados aberto com sucesso.');
-    }.bind(this);
+    };
   }
 
-  useTable(tableName) {
+  public useTable(tableName: string): IndexedSync {
     this.tableName = tableName;
     return this;
   }
 
-  dados(data) {
+  public dados(data: [{}] | {}): IndexedSync {
     this.dataToSave = data;
     return this;
   }
 
-  save() {
+  public save(): void {
     const self = this;
 
     const request = indexedDB.open(self.dbName, self.dbVersion);
 
-    request.onsuccess = function (event) {
-      const db = event.target.result;
+    request.onsuccess = (event) => {
+      const db = (event.target as any).result;
 
       const transaction = db.transaction([self.tableName], 'readwrite');
       const store = transaction.objectStore(self.tableName);
 
-      const addUniqueData = (item) => {
+      const addUniqueData = (item: any) => {
         const getRequest = store.get(item[self.config.key]);
 
-        getRequest.onsuccess = function () {
+        getRequest.onsuccess = () => {
           const existingData = getRequest.result;
           if (existingData) {
             // console.log('Dados já existentes:', existingData);
@@ -116,77 +101,77 @@ class indexedSync {
         console.error('Dados inválidos para salvar no banco de dados.');
       }
 
-      transaction.oncomplete = function () {
+      transaction.oncomplete = () => {
         console.log('Operação concluída com sucesso!');
       };
     };
 
-    request.onerror = function (event) {
-      console.error('Erro ao abrir o banco de dados', event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as any).error);
     };
   }
 
-  getAll(callback) {
+  public getAll(callback: (result: any) => void): void {
     const self = this;
     const request = indexedDB.open(this.dbName);
 
-    request.onsuccess = function (event) {
-      const db = event.target.result;
+    request.onsuccess = (event) => {
+      const db = (event.target as any).result;
 
       const transaction = db.transaction([self.tableName], 'readonly');
       const store = transaction.objectStore(self.tableName);
 
       const getRequest = store.getAll();
 
-      getRequest.onsuccess = function () {
+      getRequest.onsuccess = () => {
         callback(getRequest.result);
       };
     };
 
-    request.onerror = function (event) {
-      console.error("Erro ao abrir o banco de dados", event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as any).error);
     };
   }
 
-  getById(key, callback) {
+  public getById(key: string, callback: (result: any) => void): void {
     const self = this;
     const request = indexedDB.open(self.dbName);
 
-    request.onsuccess = function (event) {
-      const db = event.target.result;
+    request.onsuccess = (event) => {
+      const db = (event.target as any).result;
       const transaction = db.transaction([self.tableName], 'readonly');
       const store = transaction.objectStore(self.tableName);
 
       const getRequest = store.get([key]);
 
-      getRequest.onsuccess = function () {
+      getRequest.onsuccess = () => {
         const result = getRequest.result;
         callback(result);
       };
 
-      transaction.oncomplete = function () {
+      transaction.oncomplete = () => {
         // console.log('Operação concluída com sucesso!');
       };
     };
 
-    request.onerror = function (event) {
-      console.error("Erro ao abrir o banco de dados", event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as any).error);
     };
   }
 
-  updateId(key, newData, callback) {
+  public updateId(key: string, newData: object, callback: (result: any) => void): void {
     const self = this;
     const request = indexedDB.open(this.dbName);
 
-    request.onsuccess = function (event) {
-      const db = event.target.result;
+    request.onsuccess = (event) => {
+      const db = (event.target as any).result;
 
       const transaction = db.transaction([self.tableName], 'readwrite');
       const store = transaction.objectStore(self.tableName);
 
       const getRequest = store.get([key]);
 
-      getRequest.onsuccess = function () {
+      getRequest.onsuccess = () => {
         const existingData = getRequest.result;
         if (existingData) {
           // Atualize os campos desejados com os novos dados
@@ -194,14 +179,14 @@ class indexedSync {
 
           const updateRequest = store.put(existingData);
 
-          updateRequest.onsuccess = function () {
+          updateRequest.onsuccess = () => {
             // console.log('Registro atualizado com sucesso:', existingData);
             if (typeof callback === 'function') {
               callback(existingData);
             }
           };
 
-          updateRequest.onerror = function () {
+          updateRequest.onerror = () => {
             console.error('Erro ao atualizar o registro:', updateRequest.error);
           };
         } else {
@@ -209,39 +194,39 @@ class indexedSync {
         }
       };
 
-      getRequest.onerror = function () {
+      getRequest.onerror = () => {
         console.error('Erro ao obter o registro para atualização:', getRequest.error);
       };
 
-      transaction.oncomplete = function () {
+      transaction.oncomplete = () => {
         // console.log('Operação concluída com sucesso!');
       };
     };
 
-    request.onerror = function (event) {
-      console.error('Erro ao abrir o banco de dados', event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as any).error);
     };
   }
 
-  updateAll(newData) {
+  public updateAll(newData: object): void {
     const self = this;
 
     // Abra o banco de dados em modo de leitura
     const request = indexedDB.open(self.dbName, self.dbVersion);
 
-    request.onerror = function (event) {
-      console.error('Erro ao abrir o banco de dados', event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as any).error);
     };
 
-    request.onsuccess = function (event) {
-      const db = event.target.result;
+    request.onsuccess = (event) => {
+      const db = (event.target as any).result;
       const transaction = db.transaction([self.tableName], 'readwrite');
       const store = transaction.objectStore(self.tableName);
 
       // Obtenha todos os registros do banco de dados
       const getRequest = store.getAll();
 
-      getRequest.onsuccess = function () {
+      getRequest.onsuccess = () => {
         const response = getRequest.result;
 
         // Atualize cada registro individualmente
@@ -253,55 +238,64 @@ class indexedSync {
         }
 
         // Após todas as atualizações, finalize a transação
-        transaction.oncomplete = function () {
+        transaction.oncomplete = () => {
           // console.log('Registros atualizados com sucesso.');
         };
       };
     };
   }
 
-  deleteDB(databaseName) {
+  public deleteDB(databaseName: string): void {
     const request = indexedDB.deleteDatabase(databaseName);
 
-    request.onsuccess = function () {
+    request.onsuccess = () => {
       console.log(`Banco de dados '${databaseName}' excluído com sucesso.`);
     };
 
-    request.onerror = function (event) {
-      console.error(`Erro ao excluir o banco de dados '${databaseName}':`, event.target.error);
+    request.onerror = (event) => {
+      console.error(`Erro ao excluir o banco de dados '${databaseName}':`, (event.target as any).error);
     };
 
-    request.onblocked = function () {
+    request.onblocked = () => {
       console.warn(`A exclusão do banco de dados '${databaseName}' foi bloqueada por outra transação.`);
     };
   }
 
-  saveImage(imageData) {
-    if (!self.db) {
-      throw new Error('Banco de dados não está aberto. Verifique se você chamou o construtor indexedSync com a configuração correta.');
+  public saveImage(imageData: ArrayBuffer): void {
+    if (!this.dbName) {
+      throw new Error('Banco de dados não está aberto. Verifique se você chamou o construtor IndexedSync com a configuração correta.');
     }
 
-    const transaction = self.db.transaction([self.tableName], 'readwrite');
-    const store = transaction.objectStore(self.tableName);
+    const request = indexedDB.open(this.dbName, this.dbVersion);
 
-    // Crie um Blob a partir dos dados da imagem
-    const imageBlob = new Blob([imageData], { type: 'image/jpeg' }); // Substitua 'image/jpeg' pelo tipo de imagem correto
+    request.onsuccess = (event) => {
+      const db = (event.target as IDBOpenDBRequest).result;
 
-    // Aqui você pode adicionar o Blob à tabela
-    const data = { image: imageBlob };
+      const transaction = db.transaction([this.tableName], 'readwrite');
+      const store = transaction.objectStore(this.tableName);
 
-    const addRequest = store.add(data);
+      // Crie um Blob a partir dos dados da imagem
+      const imageBlob = new Blob([imageData], { type: 'image/jpeg' }); // Substitua 'image/jpeg' pelo tipo de imagem correto
 
-    addRequest.onsuccess = function () {
-      console.log('Imagem adicionada com sucesso.');
+      // Aqui você pode adicionar o Blob à tabela
+      const data = { image: imageBlob };
+
+      const addRequest = store.add(data);
+
+      addRequest.onsuccess = () => {
+        console.log('Imagem adicionada com sucesso.');
+      };
+
+      addRequest.onerror = (event) => {
+        console.error('Erro ao adicionar a imagem:', (event.target as IDBRequest).error);
+      };
     };
 
-    addRequest.onerror = function (event) {
-      console.error('Erro ao adicionar a imagem:', event.target.error);
+    request.onerror = (event) => {
+      console.error('Erro ao abrir o banco de dados', (event.target as IDBOpenDBRequest).error);
     };
   }
+
 }
 
-export default indexedSync
-
-
+export default IndexedSync;

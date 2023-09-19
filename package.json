@@ -1,13 +1,27 @@
 {
-  "name": "indexeddb-utility-borges",
+  "name": "indexeddb-utility-bg",
   "version": "1.0.0",
-  "description": "O projeto tem como objetivo criar uma biblioteca para facilitar o uso do indexedDB.",
-  "main": "./src/indexedSync.js",
-  "keywords": [],
+  "description": "Este é um utilitário simples para trabalhar com o IndexedDB no navegador. Ele permite criar e gerenciar bancos de dados, tabelas, salvar dados e até mesmo imagens no IndexedDB.",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "scripts": {
+    "build": "tsc --declaration",
+    "dev": "ts-node --transpileOnly src/sample.ts"
+  },
+  "keywords": [
+    "IndexedDB",
+    "Banco",
+    "Armazenamento"
+  ],
   "author": {
     "name": "Gabriel Borges Oliveira",
-    "email": "gabriel.vscode@gmail.com",
-    "github": "GabrielBorges2000"
+    "github": "GabrielBorges2000",
+    "email": "gabriel.vscode@gmail.com"
   },
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.6.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.2.2"
+  }
 }
